@@ -209,3 +209,39 @@ const (
 	// TicketRevokedStatu 被撤销
 	TicketRevokedStatu = "REVOKED"
 )
+
+// 操作记录资源实例相关
+const (
+	// Separator 多个名称叠加时分隔符
+	Separator = "\n"
+	// AppName 服务名称
+	AppName = "app_name: %s"
+	// ConfigFileAbsolutePath 配置文件绝对路径
+	ConfigFileAbsolutePath = "config_file_absolute_path:: %s"
+	// ConfigItemName 配置项名称
+	ConfigItemName = "config_item_name: %s"
+	// HookName 脚本名称
+	HookName = "hook_name: %s"
+	// VariableName 变量名称
+	VariableName = "variable_name: "
+	// ConfigReleaseName 配置版本名称
+	ConfigReleaseName = "config_release_name: %s"
+	// ConfigReleaseScope 配置上线范围
+	ConfigReleaseScope = "config_release_scope: %s"
+	// GroupName 分组名称
+	GroupName = "group_name: %s"
+	// HookRevisionName 脚本版本名称
+	HookRevisionName = "hook_revision_name: %s"
+	// TemplateSpaceName 模版空间名称
+	TemplateSpaceName = "template_space_name: %s"
+	// TemplateSetName 模版套餐名称
+	TemplateSetName = "template_set_name: %s"
+	// TemplateAbsolutePath 模版文件绝对路径
+	TemplateAbsolutePath = "template_absolute_path: %s"
+	// TemplateRevision 模版版本号
+	TemplateRevision = "template_revision: %s"
+	// CredentialScope 秘钥关联规则
+	CredentialScope = "credential_scope: %s" // nolint
+	// CredentialName 秘钥名称
+	CredentialName = "credential_name: %s" // nolint
+)

@@ -35,7 +35,6 @@ type AuditDao interface {
 	// Decorator is used to handle the audit process as a pipeline
 	// according CUD scenarios.
 	Decorator(kit *kit.Kit, bizID uint32, res enumor.AuditResourceType) AuditDecorator
-	DecoratorV2(kit *kit.Kit, bizID uint32) AuditPrepare
 	DecoratorV3(kit *kit.Kit, bizID uint32, a *table.AuditField) AuditPrepare
 	// One insert one resource's audit.
 	One(kit *kit.Kit, audit *table.Audit, opt *AuditOption) error
@@ -88,12 +87,7 @@ func (au *audit) Decorator(kit *kit.Kit, bizID uint32, res enumor.AuditResourceT
 	return initAuditBuilder(kit, bizID, res, au)
 }
 
-// DecoratorV2 return audit decorator for to record audit.
-func (au *audit) DecoratorV2(kit *kit.Kit, bizID uint32) AuditPrepare {
-	return initAuditBuilderV2(kit, bizID, au)
-}
-
-// DecoratorV2 return audit decorator for to record audit.
+// DecoratorV3 return audit decorator for to record audit.
 func (au *audit) DecoratorV3(kit *kit.Kit, bizID uint32, a *table.AuditField) AuditPrepare {
 	return initAuditBuilderV3(kit, bizID, a, au)
 }
@@ -142,7 +136,7 @@ func (au *audit) ListAuditsAppStrategy(
 	}
 
 	// priority display publish version config
-	publishCount, err := query.Where(audit.Action.Eq(string(enumor.PublishReleaseConfig))).
+	publishCount, err := query.Where(audit.Action.Eq(string(enumor.Publish))).
 		Order(audit.CreatedAt.Desc()).
 		ScanByPage(&publishs, int(req.Start), int(req.Limit))
 	if err != nil {
@@ -159,7 +153,7 @@ func (au *audit) ListAuditsAppStrategy(
 	if err != nil {
 		return nil, 0, err
 	}
-	noPublishCount, err := query2.Not(audit.Action.Eq(string(enumor.PublishReleaseConfig))).
+	noPublishCount, err := query2.Not(audit.Action.Eq(string(enumor.Publish))).
 		Order(audit.CreatedAt.Desc()).
 		ScanByPage(&noPublishs, int(residueOffset), int(req.Limit)-len(publishs))
 	if err != nil {
@@ -179,7 +173,7 @@ func (au *audit) createQuery(kit *kit.Kit, req *pbds.ListAuditsReq) (gen.IAuditD
 	// 后续改造中去掉audit.ResourceType.In，现在加上为了适配原来的数据
 	result := audit.WithContext(kit.Ctx).Select(audit.ID, audit.ResourceType, audit.ResourceID, audit.Action,
 		audit.BizID, audit.AppID, audit.Operator, audit.CreatedAt, audit.ResInstance, audit.OperateWay, audit.Status,
-		audit.IsCompare,
+		audit.IsCompare, audit.Detail,
 		app.Name, app.Creator,
 		strategy.PublishType, strategy.PublishTime, strategy.PublishTime, strategy.FinalApprovalTime,
 		strategy.PublishStatus, strategy.RejectReason, strategy.Approver, strategy.ApproverProgress,
@@ -188,9 +182,9 @@ func (au *audit) createQuery(kit *kit.Kit, req *pbds.ListAuditsReq) (gen.IAuditD
 		strategy.ItsmTicketType, strategy.ApproveType, strategy.Memo).
 		LeftJoin(app, app.ID.EqCol(audit.AppID)).
 		LeftJoin(strategy, strategy.ID.EqCol(audit.StrategyId)).
-		Where(audit.BizID.Eq(req.BizId), audit.ResourceType.In(string(enumor.ResAppConfig), string(enumor.ResGroup),
-			string(enumor.ResHook), string(enumor.ResTemplate), string(enumor.ResVariable),
-			string(enumor.ResCredential), string(enumor.ResInstance)))
+		Where(audit.BizID.Eq(req.BizId), audit.ResourceType.In(string(enumor.App), string(enumor.ConfigItem),
+			string(enumor.Hook), string(enumor.Release), string(enumor.Group),
+			string(enumor.Template), string(enumor.Credential), string(enumor.Instance)))
 
 	if req.Id != 0 {
 		result = result.Where(audit.ID.Eq(req.Id))
@@ -220,7 +214,7 @@ func (au *audit) createQuery(kit *kit.Kit, req *pbds.ListAuditsReq) (gen.IAuditD
 	}
 
 	// 仅看上线操作
-	if req.Operate == string(enumor.PublishReleaseConfig) {
+	if req.Operate == string(enumor.Publish) {
 		result = result.Where(audit.Action.Eq(req.Operate))
 	}
 

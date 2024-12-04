@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/TencentBlueKing/bk-bscp/pkg/criteria/enumor"
 	"github.com/TencentBlueKing/bk-bscp/pkg/kit"
 )
 
@@ -45,7 +46,7 @@ func (t *AppTemplateVariable) ResID() uint32 {
 
 // ResType AuditRes interface
 func (t *AppTemplateVariable) ResType() string {
-	return "app_template_variable"
+	return string(enumor.Variable)
 }
 
 // ValidateUpsert validate AppTemplateVariable is valid or not when create or update it.

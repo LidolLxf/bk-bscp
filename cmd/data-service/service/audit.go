@@ -18,11 +18,11 @@ import (
 	"time"
 
 	"github.com/TencentBlueKing/bk-bscp/pkg/kit"
-	"github.com/TencentBlueKing/bk-bscp/pkg/types"
 	pbapp "github.com/TencentBlueKing/bk-bscp/pkg/protocol/core/app"
 	pbaudit "github.com/TencentBlueKing/bk-bscp/pkg/protocol/core/audit"
 	pbstrategy "github.com/TencentBlueKing/bk-bscp/pkg/protocol/core/strategy"
 	pbds "github.com/TencentBlueKing/bk-bscp/pkg/protocol/data-service"
+	"github.com/TencentBlueKing/bk-bscp/pkg/types"
 )
 
 // ListAudits list audits.
@@ -52,9 +52,9 @@ func (s *Service) ListAudits(ctx context.Context, req *pbds.ListAuditsReq) (*pbd
 				Spec: &pbaudit.AuditSpec{
 					ResType:     value.Audit.ResourceType,
 					Action:      value.Audit.Action,
-					Rid:         "", // 暂时用不到
-					AppCode:     "", // 暂时用不到
-					Detail:      "", // 暂时用不到
+					Rid:         "",                 // 暂时用不到
+					AppCode:     "",                 // 暂时用不到
+					Detail:      value.Audit.Detail, // 暂时用不到
 					Operator:    value.Audit.Operator,
 					ResInstance: value.Audit.ResInstance,
 					OperateWay:  value.Audit.OperateWay,

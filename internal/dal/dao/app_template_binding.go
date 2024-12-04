@@ -128,7 +128,6 @@ func (dao *appTemplateBindingDao) UpsertWithTx(kit *kit.Kit, tx *gen.QueryTx, at
 	q := dao.genQ.AppTemplateBinding.WithContext(kit.Ctx)
 	old, findErr := q.Where(m.BizID.Eq(atb.Attachment.BizID), m.AppID.Eq(atb.Attachment.AppID)).Take()
 
-	var ad AuditDo
 	// if old exists, update it.
 	if findErr == nil {
 		atb.ID = old.ID
@@ -139,7 +138,6 @@ func (dao *appTemplateBindingDao) UpsertWithTx(kit *kit.Kit, tx *gen.QueryTx, at
 			Updates(atb); err != nil {
 			return err
 		}
-		ad = dao.auditDao.DecoratorV2(kit, atb.Attachment.BizID).PrepareUpdate(atb, old)
 	} else if errors.Is(findErr, gorm.ErrRecordNotFound) {
 		// if old not exists, create it.
 		id, err := dao.idGen.One(kit, table.Name(atb.TableName()))
@@ -150,10 +148,9 @@ func (dao *appTemplateBindingDao) UpsertWithTx(kit *kit.Kit, tx *gen.QueryTx, at
 		if err := tx.AppTemplateBinding.WithContext(kit.Ctx).Create(atb); err != nil {
 			return err
 		}
-		ad = dao.auditDao.DecoratorV2(kit, atb.Attachment.BizID).PrepareCreate(atb)
 	}
 
-	return ad.Do(tx.Query)
+	return nil
 }
 
 // GetAppTemplateBindingByAppID 通过业务和服务ID获取模板绑定关系
@@ -187,11 +184,6 @@ func (dao *appTemplateBindingDao) CreateWithTx(kit *kit.Kit, tx *gen.QueryTx, g 
 		return 0, err
 	}
 
-	ad := dao.auditDao.DecoratorV2(kit, g.Attachment.BizID).PrepareCreate(g)
-	if err = ad.Do(tx.Query); err != nil {
-		return 0, err
-	}
-
 	return g.ID, nil
 }
 
@@ -207,28 +199,20 @@ func (dao *appTemplateBindingDao) Update(kit *kit.Kit, g *table.AppTemplateBindi
 	// 更新操作, 获取当前记录做审计
 	m := dao.genQ.AppTemplateBinding
 	q := dao.genQ.AppTemplateBinding.WithContext(kit.Ctx)
-	oldOne, err := q.Where(m.ID.Eq(g.ID), m.BizID.Eq(g.Attachment.BizID)).Take()
-	if err != nil {
-		return err
-	}
-	ad := dao.auditDao.DecoratorV2(kit, g.Attachment.BizID).PrepareUpdate(g, oldOne)
 
 	// 多个使用事务处理
 	updateTx := func(tx *gen.Query) error {
 		q = tx.AppTemplateBinding.WithContext(kit.Ctx)
-		if _, err = q.Where(m.BizID.Eq(g.Attachment.BizID), m.ID.Eq(g.ID)).
+		if _, err := q.Where(m.BizID.Eq(g.Attachment.BizID), m.ID.Eq(g.ID)).
 			Select(m.Bindings, m.TemplateSpaceIDs, m.TemplateSetIDs, m.TemplateIDs, m.TemplateRevisionIDs,
 				m.LatestTemplateIDs, m.Creator, m.Reviser, m.UpdatedAt).
 			Updates(g); err != nil {
 			return err
 		}
 
-		if err = ad.Do(tx); err != nil {
-			return err
-		}
 		return nil
 	}
-	if err = dao.genQ.Transaction(updateTx); err != nil {
+	if err := dao.genQ.Transaction(updateTx); err != nil {
 		return err
 	}
 
@@ -248,17 +232,9 @@ func (dao *appTemplateBindingDao) UpdateWithTx(kit *kit.Kit, tx *gen.QueryTx,
 	// 更新操作, 获取当前记录做审计
 	m := tx.AppTemplateBinding
 	q := tx.AppTemplateBinding.WithContext(kit.Ctx)
-	oldOne, err := q.Where(m.ID.Eq(g.ID), m.BizID.Eq(g.Attachment.BizID)).Take()
-	if err != nil {
-		return err
-	}
-	ad := dao.auditDao.DecoratorV2(kit, g.Attachment.BizID).PrepareUpdate(g, oldOne)
-	if err = ad.Do(tx.Query); err != nil {
-		return err
-	}
 
 	q = tx.AppTemplateBinding.WithContext(kit.Ctx)
-	if _, err = q.Where(m.BizID.Eq(g.Attachment.BizID), m.ID.Eq(g.ID)).
+	if _, err := q.Where(m.BizID.Eq(g.Attachment.BizID), m.ID.Eq(g.ID)).
 		Select(m.Bindings, m.TemplateSpaceIDs, m.TemplateSetIDs, m.TemplateIDs, m.TemplateRevisionIDs,
 			m.LatestTemplateIDs, m.Creator, m.Reviser, m.UpdatedAt).
 		Updates(g); err != nil {
@@ -296,25 +272,17 @@ func (dao *appTemplateBindingDao) Delete(kit *kit.Kit, g *table.AppTemplateBindi
 	// 删除操作, 获取当前记录做审计
 	m := dao.genQ.AppTemplateBinding
 	q := dao.genQ.AppTemplateBinding.WithContext(kit.Ctx)
-	oldOne, err := q.Where(m.ID.Eq(g.ID), m.BizID.Eq(g.Attachment.BizID)).Take()
-	if err != nil {
-		return err
-	}
-	ad := dao.auditDao.DecoratorV2(kit, g.Attachment.BizID).PrepareDelete(oldOne)
 
 	// 多个使用事务处理
 	deleteTx := func(tx *gen.Query) error {
 		q = tx.AppTemplateBinding.WithContext(kit.Ctx)
-		if _, err = q.Where(m.BizID.Eq(g.Attachment.BizID)).Delete(g); err != nil {
+		if _, err := q.Where(m.BizID.Eq(g.Attachment.BizID)).Delete(g); err != nil {
 			return err
 		}
 
-		if err = ad.Do(tx); err != nil {
-			return err
-		}
 		return nil
 	}
-	if err = dao.genQ.Transaction(deleteTx); err != nil {
+	if err := dao.genQ.Transaction(deleteTx); err != nil {
 		return err
 	}
 

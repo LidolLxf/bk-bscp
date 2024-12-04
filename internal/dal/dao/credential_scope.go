@@ -14,8 +14,11 @@ package dao
 
 import (
 	"errors"
+	"fmt"
 
+	"github.com/TencentBlueKing/bk-bscp/internal/criteria/constant"
 	"github.com/TencentBlueKing/bk-bscp/internal/dal/gen"
+	"github.com/TencentBlueKing/bk-bscp/pkg/criteria/enumor"
 	"github.com/TencentBlueKing/bk-bscp/pkg/dal/table"
 	"github.com/TencentBlueKing/bk-bscp/pkg/kit"
 )
@@ -76,7 +79,10 @@ func (dao *credentialScopeDao) CreateWithTx(kit *kit.Kit, tx *gen.QueryTx, g *ta
 		return 0, err
 	}
 
-	ad := dao.auditDao.DecoratorV2(kit, g.Attachment.BizID).PrepareCreate(g)
+	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
+		ResourceInstance: fmt.Sprintf(constant.CredentialScope, string(g.Spec.CredentialScope)),
+		Status:           enumor.Success,
+	}).PrepareCreate(g)
 	if err := ad.Do(tx.Query); err != nil {
 		return 0, err
 	}
@@ -128,7 +134,10 @@ func (dao *credentialScopeDao) DeleteWithTx(kit *kit.Kit, tx *gen.QueryTx, bizID
 		return err
 	}
 
-	ad := dao.auditDao.DecoratorV2(kit, bizID).PrepareDelete(oldOne)
+	ad := dao.auditDao.DecoratorV3(kit, bizID, &table.AuditField{
+		ResourceInstance: fmt.Sprintf(constant.CredentialScope, string(oldOne.Spec.CredentialScope)),
+		Status:           enumor.Success,
+	}).PrepareDelete(oldOne)
 	if err := ad.Do(tx.Query); err != nil {
 		return err
 	}
@@ -144,12 +153,10 @@ func (dao *credentialScopeDao) UpdateWithTx(kit *kit.Kit, tx *gen.QueryTx, g *ta
 
 	m := tx.CredentialScope
 
-	// 更新操作, 获取当前记录做审计
-	oldOne, err := tx.CredentialScope.WithContext(kit.Ctx).Where(m.ID.Eq(g.ID), m.BizID.Eq(g.Attachment.BizID)).Take()
-	if err != nil {
-		return err
-	}
-	ad := dao.auditDao.DecoratorV2(kit, g.Attachment.BizID).PrepareUpdate(g, oldOne)
+	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
+		ResourceInstance: fmt.Sprintf(constant.CredentialScope, string(g.Spec.CredentialScope)),
+		Status:           enumor.Success,
+	}).PrepareUpdate(g)
 
 	if _, err := tx.CredentialScope.WithContext(kit.Ctx).Where(m.BizID.Eq(g.Attachment.BizID), m.ID.Eq(g.ID)).
 		Omit(m.BizID, m.ID).Updates(g); err != nil {

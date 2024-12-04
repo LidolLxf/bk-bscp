@@ -24,9 +24,9 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/TencentBlueKing/bk-bscp/internal/components/itsm"
+	"github.com/TencentBlueKing/bk-bscp/internal/criteria/constant"
 	"github.com/TencentBlueKing/bk-bscp/internal/dal/gen"
 	"github.com/TencentBlueKing/bk-bscp/pkg/cc"
-	"github.com/TencentBlueKing/bk-bscp/pkg/criteria/constant"
 	"github.com/TencentBlueKing/bk-bscp/pkg/criteria/enumor"
 	"github.com/TencentBlueKing/bk-bscp/pkg/dal/table"
 	"github.com/TencentBlueKing/bk-bscp/pkg/i18n"
@@ -143,18 +143,18 @@ func (s *Service) SubmitPublishApprove(
 		groupName = []string{"ALL"}
 	}
 
-	resInstance := fmt.Sprintf("releases_name: %s\ngroup: %s", release.Spec.Name, strings.Join(groupName, ","))
+	resInstance := fmt.Sprintf(constant.ConfigReleaseName+"\n"+constant.ConfigReleaseScope,
+		release.Spec.Name, strings.Join(groupName, ","))
 
 	// audit this to create strategy details
 	ad := s.dao.AuditDao().DecoratorV3(grpcKit, opt.BizID, &table.AuditField{
-		OperateWay:       grpcKit.OperateWay,
-		Action:           enumor.PublishReleaseConfig,
 		ResourceInstance: resInstance,
 		Status:           enumor.AuditStatus(opt.PublishStatus),
 		AppId:            app.AppID(),
 		StrategyId:       pshID,
 		IsCompare:        req.IsCompare,
-	}).PrepareCreateByInstance(pshID, req)
+		Detail:           strings.Join(groupName, ","),
+	}).PreparePublish(strategy)
 	if err = ad.Do(tx.Query); err != nil {
 		return nil, err
 	}
@@ -520,17 +520,15 @@ func (s *Service) GenerateReleaseAndPublish(ctx context.Context, req *pbds.Gener
 		groupName = []string{"ALL"}
 	}
 
-	resInstance := fmt.Sprintf("releases_name: %s\ngroup: %s", release.Spec.Name, strings.Join(groupName, ","))
+	resInstance := fmt.Sprintf(constant.ConfigReleaseName+"\n"+constant.ConfigReleaseScope,
+		release.Spec.Name, strings.Join(groupName, ","))
 
 	// audit this to create strategy details
 	ad := s.dao.AuditDao().DecoratorV3(grpcKit, opt.BizID, &table.AuditField{
-		OperateWay:       grpcKit.OperateWay,
-		Action:           enumor.PublishReleaseConfig,
 		ResourceInstance: resInstance,
 		Status:           enumor.AuditStatus(opt.PublishStatus),
-		AppId:            app.AppID(),
 		StrategyId:       pshID,
-	}).PrepareCreateByInstance(pshID, req)
+	}).PreparePublish(strategy)
 	if err = ad.Do(tx.Query); err != nil {
 		return nil, err
 	}

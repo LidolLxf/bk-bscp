@@ -18,8 +18,10 @@ import (
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 
+	"github.com/TencentBlueKing/bk-bscp/internal/criteria/constant"
 	"github.com/TencentBlueKing/bk-bscp/internal/dal/gen"
 	"github.com/TencentBlueKing/bk-bscp/internal/dal/sharding"
+	"github.com/TencentBlueKing/bk-bscp/pkg/criteria/enumor"
 	"github.com/TencentBlueKing/bk-bscp/pkg/criteria/errf"
 	"github.com/TencentBlueKing/bk-bscp/pkg/dal/table"
 	"github.com/TencentBlueKing/bk-bscp/pkg/kit"
@@ -89,7 +91,12 @@ func (dao *releaseDao) CreateWithTx(kit *kit.Kit, tx *gen.QueryTx, g *table.Rele
 		return 0, err
 	}
 
-	ad := dao.auditDao.DecoratorV2(kit, g.Attachment.BizID).PrepareCreate(g)
+	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
+		ResourceInstance: fmt.Sprintf(constant.ConfigReleaseName, g.Spec.Name),
+		Status:           enumor.Success,
+		Detail:           g.Spec.Memo,
+		AppId:            g.Attachment.AppID,
+	}).PrepareCreate(g)
 	if err := ad.Do(tx.Query); err != nil {
 		return 0, err
 	}
