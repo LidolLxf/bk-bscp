@@ -152,23 +152,14 @@ func (dao *configItemDao) UpdateWithTx(kit *kit.Kit, tx *gen.QueryTx, ci *table.
 		Status:           enumor.Success,
 		AppId:            ci.Attachment.AppID,
 	}).PrepareUpdate(ci)
-
-	updateTx := func(tx *gen.Query) error {
-		q = tx.ConfigItem.WithContext(kit.Ctx)
-		if _, err := q.Select(m.Name, m.Path, m.FileType, m.FileMode, m.Memo, m.User, m.UserGroup,
-			m.Privilege, m.Reviser, m.UpdatedAt).
-			Where(m.ID.Eq(ci.ID), m.BizID.Eq(ci.Attachment.BizID)).Updates(ci); err != nil {
-			return err
-		}
-
-		if err := ad.Do(tx); err != nil {
-			return fmt.Errorf("audit update config item failed, err: %v", err)
-		}
-		return nil
+	if err := ad.Do(tx.Query); err != nil {
+		return fmt.Errorf("audit update config item failed, err: %v", err)
 	}
 
-	if err := dao.genQ.Transaction(updateTx); err != nil {
-		logs.Errorf("update config item: %d failed, err: %v, rid: %v", ci.ID, err, kit.Rid)
+	q = tx.ConfigItem.WithContext(kit.Ctx)
+	if _, err := q.Select(m.Name, m.Path, m.FileType, m.FileMode, m.Memo, m.User, m.UserGroup,
+		m.Privilege, m.Reviser, m.UpdatedAt).
+		Where(m.ID.Eq(ci.ID), m.BizID.Eq(ci.Attachment.BizID)).Updates(ci); err != nil {
 		return err
 	}
 

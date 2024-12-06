@@ -329,30 +329,19 @@ func (dao *hookRevisionDao) DeleteWithTx(kit *kit.Kit, tx *gen.QueryTx, hr *tabl
 	if err != nil {
 		return err
 	}
+
+	q = tx.HookRevision.WithContext(kit.Ctx)
+	if _, e := q.Where(m.BizID.Eq(hr.Attachment.BizID), m.ID.Eq(hr.ID)).Delete(hr); e != nil {
+		return e
+	}
+
 	ad := dao.auditDao.DecoratorV3(kit, hr.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.HookName+constant.Separator+constant.HookRevisionName,
+		ResourceInstance: fmt.Sprintf(constant.HookName+constant.ResSeparator+constant.HookRevisionName,
 			hookRecord.Spec.Name, oldOne.Spec.Name),
 		Status: enumor.Success,
 		Detail: oldOne.Spec.Memo,
 	}).PrepareDelete(oldOne)
-
-	// 多个使用事务处理
-	deleteTx := func(tx *gen.Query) error {
-		q = tx.HookRevision.WithContext(kit.Ctx)
-		if _, e := q.Where(m.BizID.Eq(hr.Attachment.BizID), m.ID.Eq(hr.ID)).Delete(hr); e != nil {
-			return e
-		}
-
-		if e := ad.Do(tx); e != nil {
-			return e
-		}
-		return nil
-	}
-	if e := dao.genQ.Transaction(deleteTx); e != nil {
-		return e
-	}
-
-	return nil
+	return ad.Do(tx.Query)
 }
 
 // DeleteByHookIDWithTx  delete revision revision with transaction
@@ -417,7 +406,7 @@ func (dao *hookRevisionDao) UpdatePubStateWithTx(kit *kit.Kit, tx *gen.QueryTx, 
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, hr.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.HookName+constant.Separator+constant.HookRevisionName,
+		ResourceInstance: fmt.Sprintf(constant.HookName+constant.ResSeparator+constant.HookRevisionName,
 			hookRecord.Spec.Name, hr.Spec.Name),
 		Status: enumor.Success,
 		Detail: hr.Spec.Memo,
@@ -454,7 +443,7 @@ func (dao *hookRevisionDao) Update(kit *kit.Kit, hr *table.HookRevision) error {
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, hr.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.HookName+constant.Separator+constant.HookRevisionName,
+		ResourceInstance: fmt.Sprintf(constant.HookName+constant.ResSeparator+constant.HookRevisionName,
 			hookRecord.Spec.Name, hr.Spec.Name),
 		Status: enumor.Success,
 		Detail: hr.Spec.Memo,

@@ -23,8 +23,8 @@ type AuditResourceType string
 const (
 	// App 应用模块资源
 	App AuditResourceType = "app"
-	// ConfigItem 配置项资源
-	ConfigItem AuditResourceType = "config_item"
+	// Config 配置资源
+	Config AuditResourceType = "config"
 	// Hook hook脚本资源
 	Hook AuditResourceType = "hook"
 	// Variable 变量

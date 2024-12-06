@@ -182,9 +182,9 @@ func (au *audit) createQuery(kit *kit.Kit, req *pbds.ListAuditsReq) (gen.IAuditD
 		strategy.ItsmTicketType, strategy.ApproveType, strategy.Memo).
 		LeftJoin(app, app.ID.EqCol(audit.AppID)).
 		LeftJoin(strategy, strategy.ID.EqCol(audit.StrategyId)).
-		Where(audit.BizID.Eq(req.BizId), audit.ResourceType.In(string(enumor.App), string(enumor.ConfigItem),
+		Where(audit.BizID.Eq(req.BizId), audit.ResourceType.In(string(enumor.App), string(enumor.Config),
 			string(enumor.Hook), string(enumor.Release), string(enumor.Group),
-			string(enumor.Template), string(enumor.Credential), string(enumor.Instance)))
+			string(enumor.Template), string(enumor.Credential), string(enumor.Instance), string(enumor.Variable)))
 
 	if req.Id != 0 {
 		result = result.Where(audit.ID.Eq(req.Id))

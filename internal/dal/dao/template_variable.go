@@ -85,7 +85,7 @@ func (dao *templateVariableDao) Create(kit *kit.Kit, g *table.TemplateVariable) 
 	g.ID = tmplSpaceID
 
 	tmplSpaceAD := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.VariableName+"%s", g.Spec.Name),
+		ResourceInstance: fmt.Sprintf(constant.VariableName, g.Spec.Name),
 		Status:           enumor.Success,
 		Detail:           g.Spec.Memo,
 	}).PrepareCreate(g)
@@ -119,7 +119,7 @@ func (dao *templateVariableDao) Update(kit *kit.Kit, g *table.TemplateVariable) 
 	q := dao.genQ.TemplateVariable.WithContext(kit.Ctx)
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.VariableName+"%s", g.Spec.Name),
+		ResourceInstance: fmt.Sprintf(constant.VariableName, g.Spec.Name),
 		Status:           enumor.Success,
 		Detail:           g.Spec.Memo,
 	}).PrepareUpdate(g)
@@ -200,7 +200,7 @@ func (dao *templateVariableDao) Delete(kit *kit.Kit, g *table.TemplateVariable) 
 		return err
 	}
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.VariableName+"%s", oldOne.Spec.Name),
+		ResourceInstance: fmt.Sprintf(constant.VariableName, oldOne.Spec.Name),
 		Status:           enumor.Success,
 		Detail:           oldOne.Spec.Memo,
 	}).PrepareDelete(oldOne)

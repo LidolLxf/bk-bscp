@@ -284,7 +284,7 @@ func (ab *AuditBuilder) PrepareDelete(resID uint32) AuditDecorator {
 	ab.toAudit.Action = enumor.Delete
 
 	switch ab.toAudit.ResourceType {
-	case enumor.ConfigItem:
+	case enumor.Config:
 		configItem, err := ab.getConfigItem(resID)
 		if err != nil {
 			ab.hitErr = err

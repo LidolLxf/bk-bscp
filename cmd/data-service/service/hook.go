@@ -95,7 +95,7 @@ func (s *Service) CreateHook(ctx context.Context, req *pbds.CreateHookReq) (*pbd
 	}
 
 	err = s.dao.AuditDao().DecoratorV3(kt, req.Attachment.BizId, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.HookName+constant.Separator+constant.HookRevisionName,
+		ResourceInstance: fmt.Sprintf(constant.HookName+constant.ResSeparator+constant.HookRevisionName,
 			hook.Spec.Name, revision.Spec.Name),
 		Status: enumor.Success,
 		Detail: revision.Spec.Memo,

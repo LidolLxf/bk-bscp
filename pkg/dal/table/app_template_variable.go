@@ -16,6 +16,7 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/TencentBlueKing/bk-bscp/pkg/criteria/enumor"
 	"github.com/TencentBlueKing/bk-bscp/pkg/kit"
@@ -133,6 +134,15 @@ func (t *AppTemplateVariableSpec) ValidateUpsert(kit *kit.Kit) error {
 		}
 	}
 	return nil
+}
+
+// GetVariableNames get variable names
+func (t *AppTemplateVariableSpec) GetVariableNames() string {
+	var name []string
+	for _, v := range t.Variables {
+		name = append(name, v.Name)
+	}
+	return strings.Join(name, ",")
 }
 
 // AppTemplateVariableAttachment defines the AppTemplateVariable attachments.

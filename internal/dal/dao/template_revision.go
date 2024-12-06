@@ -143,8 +143,8 @@ func (dao *templateRevisionDao) Create(kit *kit.Kit, g *table.TemplateRevision) 
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateRevision+
-			constant.Separator+constant.TemplateAbsolutePath, tsRecord.Spec.Name, g.Spec.RevisionName,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateRevision+
+			constant.ResSeparator+constant.TemplateAbsolutePath, tsRecord.Spec.Name, g.Spec.RevisionName,
 			path.Join(g.Spec.Path, g.Spec.Name)),
 		Status: enumor.Success,
 		Detail: g.Spec.RevisionMemo,
@@ -196,8 +196,8 @@ func (dao *templateRevisionDao) CreateWithTx(kit *kit.Kit, tx *gen.QueryTx, g *t
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateRevision+
-			constant.Separator+constant.TemplateAbsolutePath, tsRecord.Spec.Name, g.Spec.RevisionName,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateRevision+
+			constant.ResSeparator+constant.TemplateAbsolutePath, tsRecord.Spec.Name, g.Spec.RevisionName,
 			path.Join(g.Spec.Path, g.Spec.Name)),
 		Status: enumor.Success,
 		Detail: g.Spec.RevisionMemo,
@@ -265,8 +265,8 @@ func (dao *templateRevisionDao) Delete(kit *kit.Kit, g *table.TemplateRevision) 
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateRevision+
-			constant.Separator+constant.TemplateAbsolutePath, tsRecord.Spec.Name, oldOne.Spec.RevisionName,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateRevision+
+			constant.ResSeparator+constant.TemplateAbsolutePath, tsRecord.Spec.Name, oldOne.Spec.RevisionName,
 			path.Join(oldOne.Spec.Path, oldOne.Spec.Name)),
 		Status: enumor.Success,
 		Detail: oldOne.Spec.RevisionMemo,

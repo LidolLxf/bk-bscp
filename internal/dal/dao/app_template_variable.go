@@ -98,7 +98,7 @@ func (dao *appTemplateVariableDao) Upsert(kit *kit.Kit, g *table.AppTemplateVari
 				return err
 			}
 			ad = dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-				ResourceInstance: fmt.Sprintf(constant.VariableName+"%d", g.ID),
+				ResourceInstance: fmt.Sprintf(constant.VariableName, g.Spec.GetVariableNames()),
 				Status:           enumor.Success,
 				AppId:            g.Attachment.AppID,
 			}).PrepareUpdate(old)
@@ -113,7 +113,7 @@ func (dao *appTemplateVariableDao) Upsert(kit *kit.Kit, g *table.AppTemplateVari
 				return err
 			}
 			ad = dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-				ResourceInstance: fmt.Sprintf(constant.VariableName+"%d", g.ID),
+				ResourceInstance: fmt.Sprintf(constant.VariableName, g.Spec.GetVariableNames()),
 				Status:           enumor.Success,
 				AppId:            g.Attachment.AppID,
 			}).PrepareCreate(g)
@@ -149,7 +149,7 @@ func (dao *appTemplateVariableDao) UpsertWithTx(kit *kit.Kit, tx *gen.QueryTx, g
 			return err
 		}
 		ad = dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-			ResourceInstance: fmt.Sprintf(constant.VariableName+"%d", g.ID),
+			ResourceInstance: fmt.Sprintf(constant.VariableName, g.Spec.GetVariableNames()),
 			Status:           enumor.Success,
 			AppId:            g.Attachment.AppID,
 		}).PrepareUpdate(old)
@@ -164,7 +164,7 @@ func (dao *appTemplateVariableDao) UpsertWithTx(kit *kit.Kit, tx *gen.QueryTx, g
 			return err
 		}
 		ad = dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-			ResourceInstance: fmt.Sprintf(constant.VariableName+"%d", g.ID),
+			ResourceInstance: fmt.Sprintf(constant.VariableName, g.Spec.GetVariableNames()),
 			Status:           enumor.Success,
 			AppId:            g.Attachment.AppID,
 		}).PrepareCreate(g)

@@ -94,7 +94,7 @@ func (dao *templateSpaceDao) Create(kit *kit.Kit, g *table.TemplateSpace) (uint3
 		Detail:           g.Spec.Memo,
 	}).PrepareCreate(g)
 	tmplSetAD := dao.auditDao.DecoratorV3(kit, sg.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateSetName,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateSetName,
 			g.Spec.Name, sg.Spec.Name),
 		Status: enumor.Success,
 		Detail: sg.Spec.Memo,
@@ -314,7 +314,7 @@ func (dao *templateSpaceDao) CreateDefault(kit *kit.Kit, bizID uint32) (uint32, 
 		Detail:           g.Spec.Memo,
 	}).PrepareCreate(g)
 	tmplSetAD := dao.auditDao.DecoratorV3(kit, sg.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateSetName,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateSetName,
 			g.Spec.Name, sg.Spec.Name),
 		Status: enumor.Success,
 		Detail: sg.Spec.Memo,

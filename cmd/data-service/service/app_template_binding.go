@@ -20,9 +20,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/TencentBlueKing/bk-bscp/internal/criteria/constant"
 	"github.com/TencentBlueKing/bk-bscp/internal/dal/gen"
 	"github.com/TencentBlueKing/bk-bscp/internal/search"
-	"github.com/TencentBlueKing/bk-bscp/pkg/criteria/constant"
+	"github.com/TencentBlueKing/bk-bscp/pkg/criteria/enumor"
 	"github.com/TencentBlueKing/bk-bscp/pkg/criteria/errf"
 	"github.com/TencentBlueKing/bk-bscp/pkg/dal/table"
 	"github.com/TencentBlueKing/bk-bscp/pkg/i18n"
@@ -126,7 +127,15 @@ func (s *Service) UpdateAppTemplateBinding(ctx context.Context, req *pbds.Update
 		return nil, err
 	}
 
+	isRollback := true
 	tx := s.dao.GenQuery().Begin()
+	defer func() {
+		if isRollback {
+			if rErr := tx.Rollback(); rErr != nil {
+				logs.Errorf("transaction rollback failed, err: %v, rid: %s", rErr, kt.Rid)
+			}
+		}
+	}()
 
 	if err := s.dao.AppTemplateBinding().UpdateWithTx(kt, tx, appTemplateBinding); err != nil {
 		logs.Errorf("update app template binding failed, err: %v, rid: %s", err, kt.Rid)
@@ -136,9 +145,6 @@ func (s *Service) UpdateAppTemplateBinding(ctx context.Context, req *pbds.Update
 	// validate config items count.
 	if err := s.dao.ConfigItem().ValidateAppCINumber(kt, tx, req.Attachment.BizId, req.Attachment.AppId); err != nil {
 		logs.Errorf("validate config items count failed, err: %v, rid: %s", err, kt.Rid)
-		if rErr := tx.Rollback(); rErr != nil {
-			logs.Errorf("transaction rollback failed, err: %v, rid: %s", rErr, kt.Rid)
-		}
 		return nil, err
 	}
 
@@ -146,6 +152,7 @@ func (s *Service) UpdateAppTemplateBinding(ctx context.Context, req *pbds.Update
 		logs.Errorf("commit transaction failed, err: %v, rid: %s", err, kt.Rid)
 		return nil, err
 	}
+	isRollback = false
 
 	return new(pbbase.EmptyResp), nil
 }
@@ -1025,13 +1032,17 @@ func (s *Service) ImportFromTemplateSetToApp(ctx context.Context, req *pbds.Impo
 	templateIds, templateRevisionIds, latestTemplateIds, templateSetIds, templateSpaceIds :=
 		[]uint32{}, []uint32{}, []uint32{}, []uint32{}, []uint32{}
 	validatedTemplateSetNames := map[uint32]string{}
+	var templateSetNames []string
 	validatedTemplateSpaceNames := map[uint32]string{}
+	var templateSpaceNames []string
 	bindings := make([]*table.TemplateBinding, 0)
 	for _, binding := range req.GetBindings() {
 		templateSetIds = append(templateSetIds, binding.GetTemplateSetId())
 		templateSpaceIds = append(templateSpaceIds, binding.GetTemplateSpaceId())
 		validatedTemplateSetNames[binding.GetTemplateSetId()] = binding.GetTemplateSetName()
+		templateSetNames = append(templateSetNames, binding.GetTemplateSetName())
 		validatedTemplateSpaceNames[binding.GetTemplateSpaceId()] = binding.GetTemplateSpaceName()
+		templateSpaceNames = append(templateSpaceNames, binding.GetTemplateSpaceName())
 		revisions := make([]*table.TemplateRevisionBinding, 0)
 		for _, v := range binding.GetTemplateRevisions() {
 			templateIds = append(templateIds, v.TemplateId)
@@ -1077,7 +1088,15 @@ func (s *Service) ImportFromTemplateSetToApp(ctx context.Context, req *pbds.Impo
 		return nil, err
 	}
 
+	isRollback := true
 	tx := s.dao.GenQuery().Begin()
+	defer func() {
+		if isRollback {
+			if rErr := tx.Rollback(); rErr != nil {
+				logs.Errorf("transaction rollback failed, err: %v, rid: %s", rErr, kit.Rid)
+			}
+		}
+	}()
 	appTemplateBinding := &table.AppTemplateBinding{
 		Spec: &table.AppTemplateBindingSpec{
 			TemplateSpaceIDs:    tools.RemoveDuplicates(templateSpaceIds),
@@ -1104,10 +1123,26 @@ func (s *Service) ImportFromTemplateSetToApp(ctx context.Context, req *pbds.Impo
 		return nil, errf.Errorf(errf.DBOpFailed, i18n.T(kit, "update app template binding failed, err: %v", err))
 	}
 
+	resInstance := fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateSetName,
+		strings.Join(templateSpaceNames, constant.NameSeparator),
+		strings.Join(templateSetNames, constant.NameSeparator))
+
+	// audit this to create strategy details
+	ad := s.dao.AuditDao().DecoratorV3(kit, req.BizId, &table.AuditField{
+		ResourceInstance: resInstance,
+		Status:           enumor.Success,
+		AppId:            req.AppId,
+	}).PrepareCreate(&table.ConfigItem{ID: appTemplateBinding.ID})
+	if err = ad.Do(tx.Query); err != nil {
+		return nil, errf.Errorf(errf.DBOpFailed,
+			i18n.T(kit, "remove the template set bound to the app failed, err: %s", err))
+	}
+
 	if err := tx.Commit(); err != nil {
 		logs.Errorf("commit transaction failed, err: %v, rid: %s", err, kit.Rid)
 		return nil, err
 	}
+	isRollback = false
 
 	return &pbbase.EmptyResp{}, nil
 }

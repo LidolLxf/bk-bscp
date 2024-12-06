@@ -143,8 +143,8 @@ func (s *Service) SubmitPublishApprove(
 		groupName = []string{"ALL"}
 	}
 
-	resInstance := fmt.Sprintf(constant.ConfigReleaseName+"\n"+constant.ConfigReleaseScope,
-		release.Spec.Name, strings.Join(groupName, ","))
+	resInstance := fmt.Sprintf(constant.ConfigReleaseName+constant.ResSeparator+constant.ConfigReleaseScope,
+		release.Spec.Name, strings.Join(groupName, constant.NameSeparator))
 
 	// audit this to create strategy details
 	ad := s.dao.AuditDao().DecoratorV3(grpcKit, opt.BizID, &table.AuditField{
@@ -153,7 +153,7 @@ func (s *Service) SubmitPublishApprove(
 		AppId:            app.AppID(),
 		StrategyId:       pshID,
 		IsCompare:        req.IsCompare,
-		Detail:           strings.Join(groupName, ","),
+		Detail:           strings.Join(groupName, constant.NameSeparator),
 	}).PreparePublish(strategy)
 	if err = ad.Do(tx.Query); err != nil {
 		return nil, err
@@ -167,7 +167,7 @@ func (s *Service) SubmitPublishApprove(
 
 	// itsm流程创建ticket
 	if app.Spec.IsApprove {
-		scope := strings.Join(groupName, ",")
+		scope := strings.Join(groupName, constant.NameSeparator)
 		ticketData, errCreate := s.submitCreateApproveTicket(
 			grpcKit, app, release.Spec.Name, scope, req.Memo, ad.GetAuditID(), release.ID)
 		if errCreate != nil {
@@ -520,8 +520,8 @@ func (s *Service) GenerateReleaseAndPublish(ctx context.Context, req *pbds.Gener
 		groupName = []string{"ALL"}
 	}
 
-	resInstance := fmt.Sprintf(constant.ConfigReleaseName+"\n"+constant.ConfigReleaseScope,
-		release.Spec.Name, strings.Join(groupName, ","))
+	resInstance := fmt.Sprintf(constant.ConfigReleaseName+constant.ResSeparator+constant.ConfigReleaseScope,
+		release.Spec.Name, strings.Join(groupName, constant.NameSeparator))
 
 	// audit this to create strategy details
 	ad := s.dao.AuditDao().DecoratorV3(grpcKit, opt.BizID, &table.AuditField{
@@ -535,7 +535,7 @@ func (s *Service) GenerateReleaseAndPublish(ctx context.Context, req *pbds.Gener
 
 	// itsm流程创建ticket
 	if app.Spec.IsApprove {
-		scope := strings.Join(groupName, ",")
+		scope := strings.Join(groupName, constant.NameSeparator)
 		ticketData, errCreate := s.submitCreateApproveTicket(
 			grpcKit, app, release.Spec.Name, scope, req.ReleaseMemo, ad.GetAuditID(), release.ID)
 		if errCreate != nil {
@@ -680,7 +680,7 @@ func (s *Service) passApprove(
 			result["itsm_ticket_status"] = constant.ItsmTicketStatusPassed
 		} else {
 			// 审批人列表更新
-			result["approver_progress"] = strings.Join(newProgressUsers, ",")
+			result["approver_progress"] = strings.Join(newProgressUsers, constant.NameSeparator)
 		}
 	}
 

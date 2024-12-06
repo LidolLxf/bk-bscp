@@ -151,7 +151,7 @@ func (dao *templateSetDao) Create(kit *kit.Kit, g *table.TemplateSet) (uint32, e
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateSetName,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateSetName,
 			tsRecord.Spec.Name, g.Spec.Name),
 		Status: enumor.Success,
 		Detail: g.Spec.Memo,
@@ -200,7 +200,7 @@ func (dao *templateSetDao) Update(kit *kit.Kit, g *table.TemplateSet) error {
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateSetName,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateSetName,
 			tsRecord.Spec.Name, g.Spec.Name),
 		Status: enumor.Success,
 		Detail: g.Spec.Memo,
@@ -249,7 +249,7 @@ func (dao *templateSetDao) UpdateWithTx(kit *kit.Kit, tx *gen.QueryTx, g *table.
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateSetName,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateSetName,
 			tsRecord.Spec.Name, g.Spec.Name),
 		Status: enumor.Success,
 		Detail: g.Spec.Memo,
@@ -328,7 +328,7 @@ func (dao *templateSetDao) Delete(kit *kit.Kit, g *table.TemplateSet) error {
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateSetName,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateSetName,
 			tsRecord.Spec.Name, oldOne.Spec.Name),
 		Status: enumor.Success,
 		Detail: oldOne.Spec.Memo,
@@ -374,7 +374,7 @@ func (dao *templateSetDao) DeleteWithTx(kit *kit.Kit, tx *gen.QueryTx, g *table.
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateSetName,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateSetName,
 			tsRecord.Spec.Name, oldOne.Spec.Name),
 		Status: enumor.Success,
 		Detail: oldOne.Spec.Memo,

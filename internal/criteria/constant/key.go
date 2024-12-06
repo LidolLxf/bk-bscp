@@ -212,18 +212,20 @@ const (
 
 // 操作记录资源实例相关
 const (
-	// Separator 多个名称叠加时分隔符
-	Separator = "\n"
+	// ResSeparator 不同资源名称叠加时分隔符
+	ResSeparator = "\n"
+	// NameSeparator 相同资源名称叠加时分隔符
+	NameSeparator = ","
 	// AppName 服务名称
 	AppName = "app_name: %s"
 	// ConfigFileAbsolutePath 配置文件绝对路径
-	ConfigFileAbsolutePath = "config_file_absolute_path:: %s"
+	ConfigFileAbsolutePath = "config_file_absolute_path: %s"
 	// ConfigItemName 配置项名称
 	ConfigItemName = "config_item_name: %s"
 	// HookName 脚本名称
 	HookName = "hook_name: %s"
 	// VariableName 变量名称
-	VariableName = "variable_name: "
+	VariableName = "variable_name: %s"
 	// ConfigReleaseName 配置版本名称
 	ConfigReleaseName = "config_release_name: %s"
 	// ConfigReleaseScope 配置上线范围
@@ -244,4 +246,16 @@ const (
 	CredentialScope = "credential_scope: %s" // nolint
 	// CredentialName 秘钥名称
 	CredentialName = "credential_name: %s" // nolint
+	// ReferenceHookName 引用脚本名称
+	ReferenceHookName = "reference_%s_name: %s"
+	// ReplaceHookName 更换脚本名称
+	ReplaceHookName = "replace_%s_name: %s"
+	// CancelPreHookName 取消脚本名称
+	CancelHookName = "cancel_%s_name: %s"
+	// ObsoleteConfigReleaseName 废弃配置版本名称
+	ObsoleteConfigReleaseName = "obsolete_config_release_name: %s"
+	// RestoreConfigReleaseName 恢复配置版本名称
+	RestoreConfigReleaseName = "restore_config_release_name: %s"
+	// DeleteConfigReleaseName 删除配置版本名称
+	DeleteConfigReleaseName = "delete_config_release_name: %s"
 )

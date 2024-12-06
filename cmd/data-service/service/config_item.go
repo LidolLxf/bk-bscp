@@ -1272,7 +1272,15 @@ func (s *Service) UnDeleteConfigItem(ctx context.Context, req *pbds.UnDeleteConf
 	}
 
 	commitID, contentID := []uint32{}, []uint32{}
+	isRollback := true
 	tx := s.dao.GenQuery().Begin()
+	defer func() {
+		if isRollback {
+			if rErr := tx.Rollback(); rErr != nil {
+				logs.Errorf("transaction rollback failed, err: %v, rid: %s", rErr, grpcKit.Rid)
+			}
+		}
+	}()
 	// 判断是不是新增的数据
 	if ci != nil && ci.ID != 0 {
 		rci, errCi := s.dao.ReleasedCI().Get(grpcKit, req.Attachment.BizId,
@@ -1287,9 +1295,6 @@ func (s *Service) UnDeleteConfigItem(ctx context.Context, req *pbds.UnDeleteConf
 		}
 		if err = s.dao.ConfigItem().DeleteWithTx(grpcKit, tx, ci); err != nil {
 			logs.Errorf("recover config item failed, err: %v, rid: %s", err, grpcKit.Rid)
-			if rErr := tx.Rollback(); rErr != nil {
-				logs.Errorf("transaction rollback failed, err: %v, rid: %s", rErr, grpcKit.Rid)
-			}
 			return nil, errf.Errorf(errf.DBOpFailed,
 				i18n.T(grpcKit, "recover config item failed, err: %v", err))
 		}
@@ -1311,18 +1316,12 @@ func (s *Service) UnDeleteConfigItem(ctx context.Context, req *pbds.UnDeleteConf
 
 	if err = s.dao.Commit().BatchDeleteWithTx(grpcKit, tx, commitID); err != nil {
 		logs.Errorf("undo commit failed, err: %v, rid: %s", err, grpcKit.Rid)
-		if rErr := tx.Rollback(); rErr != nil {
-			logs.Errorf("transaction rollback failed, err: %v, rid: %s", rErr, grpcKit.Rid)
-		}
 		return nil, errf.Errorf(errf.DBOpFailed,
 			i18n.T(grpcKit, "recover config item failed, err: %v", err))
 	}
 
 	if err = s.dao.Content().BatchDeleteWithTx(grpcKit, tx, contentID); err != nil {
 		logs.Errorf("undo content failed, err: %v, rid: %s", err, grpcKit.Rid)
-		if rErr := tx.Rollback(); rErr != nil {
-			logs.Errorf("transaction rollback failed, err: %v, rid: %s", rErr, grpcKit.Rid)
-		}
 		return nil, errf.Errorf(errf.DBOpFailed,
 			i18n.T(grpcKit, "recover config item failed, err: %v", err))
 	}
@@ -1335,9 +1334,6 @@ func (s *Service) UnDeleteConfigItem(ctx context.Context, req *pbds.UnDeleteConf
 	}
 	if err = s.dao.ConfigItem().RecoverConfigItem(grpcKit, tx, data); err != nil {
 		logs.Errorf("recover config item failed, err: %v, rid: %s", err, grpcKit.Rid)
-		if rErr := tx.Rollback(); rErr != nil {
-			logs.Errorf("transaction rollback failed, err: %v, rid: %s", rErr, grpcKit.Rid)
-		}
 		return nil, errf.Errorf(errf.DBOpFailed,
 			i18n.T(grpcKit, "recover config item failed, err: %v", err))
 	}
@@ -1346,6 +1342,7 @@ func (s *Service) UnDeleteConfigItem(ctx context.Context, req *pbds.UnDeleteConf
 		return nil, errf.Errorf(errf.DBOpFailed,
 			i18n.T(grpcKit, "recover config item failed, err: %v", e))
 	}
+	isRollback = false
 
 	return new(pbbase.EmptyResp), nil
 }
@@ -1973,9 +1970,32 @@ func (s *Service) RemoveAppBoundTmplSet(ctx context.Context, req *pbds.RemoveApp
 		},
 	}
 
-	if err = s.dao.AppTemplateBinding().Update(kit, appTemplateBinding); err != nil {
+	tx := s.dao.GenQuery().Begin()
+	if err = s.dao.AppTemplateBinding().UpdateWithTx(kit, tx, appTemplateBinding); err != nil {
+		if rErr := tx.Rollback(); rErr != nil {
+			logs.Errorf("transaction rollback failed, err: %v, rid: %s", rErr, kit.Rid)
+		}
 		return nil, errf.Errorf(errf.DBOpFailed,
 			i18n.T(kit, "remove the template set bound to the app failed, err: %s", err))
+	}
+
+	// // audit this to create strategy details
+	// ad := s.dao.AuditDao().DecoratorV3(kit, req.BizId, &table.AuditField{
+	// 	ResourceInstance: fmt.Sprintf(),
+	// 	Status:           enumor.Success,
+	// 	AppId:            req.AppId,
+	// }).PrepareDelete(&table.ConfigItem{ID: binding.ID})
+	// if err = ad.Do(tx.Query); err != nil {
+	// 	if rErr := tx.Rollback(); rErr != nil {
+	// 		logs.Errorf("transaction rollback failed, err: %v, rid: %s", rErr, kit.Rid)
+	// 	}
+	// 	return nil, errf.Errorf(errf.DBOpFailed,
+	// 		i18n.T(kit, "remove the template set bound to the app failed, err: %s", err))
+	// }
+
+	if err = tx.Commit(); err != nil {
+		logs.Errorf("commit transaction failed, err: %v, rid: %s", err, kit.Rid)
+		return nil, err
 	}
 
 	return &pbbase.EmptyResp{}, nil

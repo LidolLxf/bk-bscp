@@ -117,3 +117,9 @@ type StrategyPart struct {
 	ApproveType       string      `db:"approve_type" json:"approve_type" gorm:"column:approve_type"`
 	Memo              string      `db:"memo" json:"memo" gorm:"column:memo"`
 }
+
+// TemplateSetSpaceName template space set name
+type TemplateSetSpaceName struct {
+	TemplateSetName   string `db:"template_set_name" json:"template_set_name" gorm:"column:template_set_name"`
+	TemplateSpaceName string `db:"template_space_name" json:"template_space_name" gorm:"column:template_space_name"`
+}

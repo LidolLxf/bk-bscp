@@ -94,7 +94,7 @@ func (dao *templateDao) UpdateWithTx(kit *kit.Kit, tx *gen.QueryTx, g *table.Tem
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateAbsolutePath,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateAbsolutePath,
 			tsRecord.Spec.Name, path.Join(g.Spec.Path, g.Spec.Name)),
 		Status: enumor.Success,
 		Detail: g.Spec.Memo,
@@ -235,7 +235,7 @@ func (dao *templateDao) CreateWithTx(kit *kit.Kit, tx *gen.QueryTx, g *table.Tem
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateAbsolutePath,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateAbsolutePath,
 			tsRecord.Spec.Name, path.Join(g.Spec.Path, g.Spec.Name)),
 		Status: enumor.Success,
 		Detail: g.Spec.Memo,
@@ -265,7 +265,7 @@ func (dao *templateDao) Update(kit *kit.Kit, g *table.Template) error {
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateAbsolutePath,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateAbsolutePath,
 			tsRecord.Spec.Name, path.Join(g.Spec.Path, g.Spec.Name)),
 		Status: enumor.Success,
 		Detail: g.Spec.Memo,
@@ -358,7 +358,7 @@ func (dao *templateDao) Delete(kit *kit.Kit, g *table.Template) error {
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateAbsolutePath,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateAbsolutePath,
 			tsRecord.Spec.Name, path.Join(oldOne.Spec.Path, oldOne.Spec.Name)),
 		Status: enumor.Success,
 		Detail: oldOne.Spec.Memo,
@@ -404,7 +404,7 @@ func (dao *templateDao) DeleteWithTx(kit *kit.Kit, tx *gen.QueryTx, g *table.Tem
 	}
 
 	ad := dao.auditDao.DecoratorV3(kit, g.Attachment.BizID, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.Separator+constant.TemplateAbsolutePath,
+		ResourceInstance: fmt.Sprintf(constant.TemplateSpaceName+constant.ResSeparator+constant.TemplateAbsolutePath,
 			tsRecord.Spec.Name, path.Join(oldOne.Spec.Path, oldOne.Spec.Name)),
 		Status: enumor.Success,
 		Detail: oldOne.Spec.Memo,

@@ -78,7 +78,7 @@ func (s *Service) CreateHookRevision(ctx context.Context,
 	}
 
 	err = s.dao.AuditDao().DecoratorV3(kt, req.Attachment.BizId, &table.AuditField{
-		ResourceInstance: fmt.Sprintf(constant.HookName+constant.Separator+constant.HookRevisionName,
+		ResourceInstance: fmt.Sprintf(constant.HookName+constant.ResSeparator+constant.HookRevisionName,
 			hook.Spec.Name, req.Spec.Name),
 		Status: enumor.Success,
 		Detail: req.Spec.Memo,

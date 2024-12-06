@@ -73,7 +73,7 @@ func (k *Kv) ResID() uint32 {
 
 // ResType KvRes interface
 func (k *Kv) ResType() string {
-	return string(enumor.ConfigItem)
+	return string(enumor.Config)
 }
 
 // ValidateCreate validate kv is valid or not when create it.
