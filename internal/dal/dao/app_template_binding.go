@@ -164,6 +164,7 @@ func (dao *appTemplateBindingDao) UpsertWithTx(kit *kit.Kit, tx *gen.QueryTx, at
 		return err
 	}
 
+	// 待完善，还没改完 Todo
 	var templateSpaceNames []string
 	templateSpaceNamesM := make(map[string]struct{})
 	var templateSetNames []string
