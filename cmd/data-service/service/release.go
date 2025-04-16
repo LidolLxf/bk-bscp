@@ -791,6 +791,17 @@ func (s *Service) GetRelease(ctx context.Context, req *pbds.GetReleaseReq) (*pbr
 func (s *Service) DeprecateRelease(ctx context.Context, req *pbds.DeprecateReleaseReq) (*pbbase.EmptyResp, error) {
 	grpcKit := kit.FromGrpcContext(ctx)
 
+	// 检查版本是否在上线过程，上线过程的版本不给废弃
+	strategies, err := s.dao.Strategy().ListStrategyByReleasesIDs(grpcKit, []uint32{req.ReleaseId})
+	if err != nil {
+		return nil, err
+	}
+	if len(strategies) > 0 && (strategies[len(strategies)-1].Spec.PublishStatus == table.AlreadyPublish ||
+		strategies[len(strategies)-1].Spec.PublishStatus == table.PendingApproval ||
+		strategies[len(strategies)-1].Spec.PublishStatus == table.PendingPublish) {
+		return nil, fmt.Errorf("release %d was published or publishing, can not deprecate", req.ReleaseId)
+	}
+
 	// check if release was published
 	rgs, err := s.dao.ReleasedGroup().ListAllByReleaseID(grpcKit, req.ReleaseId, req.BizId)
 	if err != nil {
